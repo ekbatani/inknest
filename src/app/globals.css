@@ -12,7 +12,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--inkest-font-body);
-  --font-mono: var(--font-geist-mono), "Geist Mono", ui-monospace, monospace;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
   --font-serif: var(--font-serif);
   --font-rtl-fallback: var(--font-rtl-fallback);
   --font-heading: var(--inkest-font-body);
@@ -61,21 +61,21 @@
   --sar: env(safe-area-inset-right, 0px);
   --font-inter: "Inter", "Geist", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-plus-jakarta: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-jetbrains-mono: "JetBrains Mono", var(--font-geist-mono), "Cascadia Code", "Fira Code", ui-monospace, monospace;
-  --font-newsreader: "Newsreader", var(--font-lora), "Charter", Georgia, "Times New Roman", serif;
-  --font-sans-default: var(--font-geist-sans), "Geist", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-jetbrains-mono: "JetBrains Mono", "Cascadia Code", "Fira Code", ui-monospace, monospace;
+  --font-newsreader: "Newsreader", "Charter", Georgia, "Times New Roman", serif;
+  --font-sans-default: "Inter", "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-sans: var(--inkest-font-body, var(--font-sans-default));
-  --font-mono: var(--font-geist-mono), "Geist Mono", "JetBrains Mono", "Cascadia Code", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  --font-serif: var(--font-lora), "Lora", "Charter", "Bitstream Charter", "Sitka Text", Georgia, Cambria, "Times New Roman", serif;
-  --font-rtl-fallback: var(--font-vazirmatn), "Vazirmatn", "Vazir", Tahoma, sans-serif;
+  --font-mono: "JetBrains Mono", "Geist Mono", "Cascadia Code", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-serif: "Lora", "Charter", "Bitstream Charter", "Sitka Text", Georgia, Cambria, "Times New Roman", serif;
+  --font-rtl-fallback: "Vazirmatn", "Vazir", Tahoma, sans-serif;
   --font-slab: "Merriweather", "Roboto Slab", "Rockwell", "Sanchez", Georgia, serif;
   --font-typewriter: "Courier Prime", "Courier New", "American Typewriter", "SF Mono", monospace;
   --font-grotesk: "Space Grotesk", "Plus Jakarta Sans", "Trebuchet MS", "Arial", sans-serif;
   --font-baskerville: "Libre Baskerville", "Baskerville", "Baskerville Old Face", "Bookman Old Style", "Palatino Linotype", "Palatino", "Times New Roman", serif;
   --font-persian-serif: "B Nazanin", "Sahel", "Vazirmatn", "IranNastaliq", "Tahoma", serif;
-  --font-persian-sahel: "Sahel", var(--font-vazirmatn), "Vazirmatn", "Vazir", Tahoma, sans-serif;
-  --font-persian-shabnam: "Shabnam", var(--font-vazirmatn), "Vazirmatn", "Vazir", Tahoma, sans-serif;
-  --font-persian-samim: "Samim", var(--font-vazirmatn), "Vazirmatn", "Vazir", Tahoma, sans-serif;
+  --font-persian-sahel: "Sahel", "Vazirmatn", "Vazir", Tahoma, sans-serif;
+  --font-persian-shabnam: "Shabnam", "Vazirmatn", "Vazir", Tahoma, sans-serif;
+  --font-persian-samim: "Samim", "Vazirmatn", "Vazir", Tahoma, sans-serif;
   --font-persian-amiri: "Amiri", "Amiri Quran", "Scheherazade New", Georgia, serif;
   --font-persian-lalezar: "Lalezar", "B Titr", "Titr", sans-serif;
   --font-persian-nastaliq: "IranNastaliq", "Iran Nastaliq", "Urdu Typesetting", "Amiri", cursive, serif;
@@ -405,7 +405,7 @@ html.dark[data-palette="midnight"],
   font-size: 1.046875rem;
   line-height: 1.72;
   letter-spacing: -0.006em;
-  color: color-mix(in oklab, var(--foreground) 91%, transparent);
+  color: var(--foreground);
 }
 .inkest-prose > * + * {
   margin-top: 1em;

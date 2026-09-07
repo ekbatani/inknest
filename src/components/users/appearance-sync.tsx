@@ -143,7 +143,7 @@ export const FONTS: FontDefinition[] = [
     description: "قلم استاندارد، هندسی و تمیز برای رابط کاربری و مقالات فارسی",
     sample: "زیبایی در سادگی و وضوح اندیشه است · ۱۲۳۴۵۶۷۸۹۰",
     sampleEn: "Simplicity is prerequisite for reliability · 12345",
-    fontFamily: "var(--font-vazirmatn), 'Vazirmatn', 'Vazir', sans-serif",
+    fontFamily: "'Vazirmatn', 'Vazir', sans-serif",
   },
   {
     id: "persian-sahel",
@@ -154,7 +154,7 @@ export const FONTS: FontDefinition[] = [
     description: "طراحی نرم، گرم و چشم‌نواز با خوانایی بسیار بالا در متون طولانی",
     sample: "آرامش در تفکر و ثبت بی‌دغدغه ایده‌ها · ۱۲۳۴۵۶۷۸۹۰",
     sampleEn: "Calm writing and mindful reflection · 12345",
-    fontFamily: "'Sahel', var(--font-vazirmatn), 'Vazirmatn', sans-serif",
+    fontFamily: "'Sahel', 'Vazirmatn', sans-serif",
   },
   {
     id: "persian-shabnam",
@@ -165,7 +165,7 @@ export const FONTS: FontDefinition[] = [
     description: "ساختار هندسی، استوار و مدرن مناسب یادداشت‌های فنی و مقالات",
     sample: "نظم در یادداشت‌ها، شفافیت در تصمیم‌گیری · ۱۲۳۴۵۶۷۸۹۰",
     sampleEn: "Structured notes and clear decisions · 12345",
-    fontFamily: "'Shabnam', var(--font-vazirmatn), 'Vazirmatn', sans-serif",
+    fontFamily: "'Shabnam', 'Vazirmatn', sans-serif",
   },
   {
     id: "persian-samim",
@@ -176,7 +176,7 @@ export const FONTS: FontDefinition[] = [
     description: "قلمی صمیمی، گرد و دوستانه مناسب ژورنال‌نویسی و بازتاب‌های روزانه",
     sample: "نوشتن روزانه، دریچه‌ای به شناخت درون · ۱۲۳۴۵۶۷۸۹۰",
     sampleEn: "Daily reflections and personal thoughts · 12345",
-    fontFamily: "'Samim', var(--font-vazirmatn), 'Vazirmatn', sans-serif",
+    fontFamily: "'Samim', 'Vazirmatn', sans-serif",
   },
   {
     id: "persian-amiri",

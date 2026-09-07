@@ -1158,7 +1158,7 @@ export function MarkdownEditor({
           "&": {
             fontSize: "1.05rem",
             backgroundColor: "transparent",
-            color: "color-mix(in oklab, var(--foreground) 91%, transparent)",
+            color: "var(--foreground)",
             minHeight: "100%",
             WebkitFontSmoothing: "antialiased",
             MozOsxFontSmoothing: "grayscale",
