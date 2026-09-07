@@ -25,6 +25,9 @@ import {
   Link2,
   CloudOff,
   AlertCircle,
+  PenLine,
+  Code,
+  Eye,
 } from "lucide-react";
 
 import { toast } from "sonner";
@@ -243,6 +246,27 @@ export function NoteEditor({
   const titleInputRef = React.useRef<HTMLInputElement>(null);
   const previewCopyRef = React.useRef<HTMLDivElement>(null);
   const [copyMenuTouched, setCopyMenuTouched] = React.useState(false);
+  const [viewMode, setViewMode] = React.useState<"live-preview" | "source" | "reading">("live-preview");
+
+  React.useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem("inkest_view_mode");
+      if (saved === "source" || saved === "reading" || saved === "live-preview") {
+        setViewMode(saved);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const handleViewModeChange = React.useCallback((mode: "live-preview" | "source" | "reading") => {
+    setViewMode(mode);
+    try {
+      window.localStorage.setItem("inkest_view_mode", mode);
+    } catch {
+      // ignore
+    }
+  }, []);
   const initialCheckpoint = React.useMemo<NoteSnapshot>(() => ({
     title: initialDraft.title,
     content: initialDraft.content,
@@ -1278,6 +1302,74 @@ export function NoteEditor({
 
           <div className="h-4 w-px bg-border/60" />
 
+          {/* Mode Switcher: Live Preview / Source / Reading */}
+          <div className="flex items-center rounded-lg bg-muted/40 p-0.5 text-muted-foreground border border-border/40">
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant={viewMode === "live-preview" ? "secondary" : "ghost"}
+                    size="sm"
+                    className={cn(
+                      "h-7 gap-1 px-2 text-xs font-medium",
+                      viewMode === "live-preview" && "bg-background text-foreground shadow-xs font-semibold"
+                    )}
+                    onClick={() => handleViewModeChange("live-preview")}
+                    aria-label="Live preview editor mode"
+                  />
+                }
+              >
+                <PenLine className="size-3.5" />
+                <span className="hidden md:inline">Live</span>
+              </TooltipTrigger>
+              <TooltipContent>Live Preview (WYSIWYG)</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant={viewMode === "source" ? "secondary" : "ghost"}
+                    size="sm"
+                    className={cn(
+                      "h-7 gap-1 px-2 text-xs font-medium",
+                      viewMode === "source" && "bg-background text-foreground shadow-xs font-semibold"
+                    )}
+                    onClick={() => handleViewModeChange("source")}
+                    aria-label="Source code editor mode"
+                  />
+                }
+              >
+                <Code className="size-3.5" />
+                <span className="hidden md:inline">Source</span>
+              </TooltipTrigger>
+              <TooltipContent>Raw Markdown Source</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant={viewMode === "reading" ? "secondary" : "ghost"}
+                    size="sm"
+                    className={cn(
+                      "h-7 gap-1 px-2 text-xs font-medium",
+                      viewMode === "reading" && "bg-background text-foreground shadow-xs font-semibold"
+                    )}
+                    onClick={() => handleViewModeChange("reading")}
+                    aria-label="Reading preview mode"
+                  />
+                }
+              >
+                <Eye className="size-3.5" />
+                <span className="hidden md:inline">Read</span>
+              </TooltipTrigger>
+              <TooltipContent>Reading Mode (HTML Preview)</TooltipContent>
+            </Tooltip>
+          </div>
+
+          <div className="h-4 w-px bg-border/60" />
+
           {/* Focus & Listen Segment */}
           <div className="flex items-center gap-0.5 rounded-lg bg-muted/40 p-0.5">
             <Tooltip>
@@ -1615,21 +1707,34 @@ export function NoteEditor({
             dir={metadata.direction}
           >
             <div className="flex min-h-0 flex-1 flex-col py-6">
-                <MarkdownEditor
-                  value={content}
-                  documentId={note.id}
-                  externalVersion={externalVersion}
-                  onChange={handleEditorChange}
-                  direction={metadata.direction}
-                  className="flex-1"
-                  editorRef={editorRef}
-                  linkableNotes={linkableNotes}
-                  onOpenLink={(href) => router.push(href)}
-                  onLargeMarkdownPaste={onLargeMarkdownPaste}
-                  spellcheck={editorPrefs?.spellcheck ?? true}
-                  spellcheckLanguage={editorPrefs?.spellcheckLanguage ?? "auto"}
-                />
-                <FloatingMarkdownFormatToolbar editorRef={editorRef} />
+              {viewMode === "reading" ? (
+                <div className="flex-1 overflow-y-auto px-1">
+                  <MarkdownPreview
+                    content={content}
+                    direction={metadata.direction}
+                    linkableNotes={linkableNotes}
+                  />
+                </div>
+              ) : (
+                <>
+                  <MarkdownEditor
+                    value={content}
+                    documentId={note.id}
+                    externalVersion={externalVersion}
+                    onChange={handleEditorChange}
+                    direction={metadata.direction}
+                    className="flex-1"
+                    editorRef={editorRef}
+                    linkableNotes={linkableNotes}
+                    onOpenLink={(href) => router.push(href)}
+                    onLargeMarkdownPaste={onLargeMarkdownPaste}
+                    spellcheck={editorPrefs?.spellcheck ?? true}
+                    spellcheckLanguage={editorPrefs?.spellcheckLanguage ?? "auto"}
+                    viewMode={viewMode === "source" ? "source" : "live-preview"}
+                  />
+                  <FloatingMarkdownFormatToolbar editorRef={editorRef} />
+                </>
+              )}
             </div>
           </div>
         </div>

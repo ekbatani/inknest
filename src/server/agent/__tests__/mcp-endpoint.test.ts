@@ -42,4 +42,22 @@ describe("Model Context Protocol (MCP) Endpoint", () => {
     const body = await res.json();
     assert.equal(body.error, "Invalid agent token format");
   });
+
+  test("rejects quoted invalid Bearer token format with 401", async () => {
+    const req = new NextRequest("http://localhost:3000/api/agent/v1/mcp", {
+      method: "POST",
+      headers: {
+        authorization: 'Bearer "not_an_ink_token"',
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "initialize",
+      }),
+    });
+    const res = await mcpPost(req);
+    assert.equal(res.status, 401);
+    const body = await res.json();
+    assert.equal(body.error, "Invalid agent token format");
+  });
 });

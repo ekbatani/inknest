@@ -52,6 +52,8 @@ import {
   createFindReplacePanel,
   openReplacePanelEffect,
 } from "@/components/editor/find-replace-panel";
+import { createMarkdownLspExtension } from "@/components/editor/extensions/markdown-lsp-extension";
+import { createLivePreviewExtension } from "@/components/editor/extensions/live-preview-extension";
 
 type Props = {
   value: string;
@@ -66,6 +68,8 @@ type Props = {
   spellcheckLanguage?: "auto" | "en" | "fa";
   documentId?: string;
   externalVersion?: number;
+  viewMode?: "source" | "live-preview";
+  enableLsp?: boolean;
 };
 
 const LARGE_PASTE_THRESHOLD = 1500;
@@ -973,8 +977,10 @@ export function MarkdownEditor({
   spellcheckLanguage = "auto",
   documentId,
   externalVersion = 0,
+  viewMode = "live-preview",
+  enableLsp = true,
 }: Props) {
-  const initialValueRef = React.useRef(value);
+  const [initialValue, setInitialValue] = React.useState(value);
   const lastDocumentIdRef = React.useRef(documentId);
   const lastExternalVersionRef = React.useRef(externalVersion);
 
@@ -1027,7 +1033,7 @@ export function MarkdownEditor({
       return;
     }
 
-    initialValueRef.current = value;
+    setInitialValue(value);
 
     const view = editorRef?.current?.view;
     if (view && view.state.doc.toString() !== value) {
@@ -1078,6 +1084,15 @@ export function MarkdownEditor({
       EditorView.decorations.of(buildLineDecorations),
       EditorView.decorations.of(buildInlineDecorations(targets)),
       EditorView.decorations.of(buildFencedBlockDecorations),
+      ...(enableLsp
+        ? [
+            createMarkdownLspExtension({
+              noteId: documentId,
+              workspaceNotes: targets,
+            }),
+          ]
+        : []),
+      ...(viewMode === "live-preview" ? [createLivePreviewExtension()] : []),
       EditorView.domEventHandlers({
         click: (event, view) => {
           const target = event.target;
@@ -1706,6 +1721,9 @@ export function MarkdownEditor({
       onLargeMarkdownPaste,
       spellcheck,
       spellcheckLanguage,
+      viewMode,
+      enableLsp,
+      documentId,
     ],
   );
 
@@ -1715,7 +1733,7 @@ export function MarkdownEditor({
     <div className={cn("relative h-full", usesRtlFont && "rtl-vazir", className)} dir={dir}>
       <CodeMirror
         ref={editorRef}
-        value={initialValueRef.current}
+        value={initialValue}
         onChange={handleCodeMirrorChange}
         extensions={extensions}
         height="100%"

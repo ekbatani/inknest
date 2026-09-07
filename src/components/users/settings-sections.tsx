@@ -2012,7 +2012,7 @@ export function AgentHarnessSection({
   };
 
   const origin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
-  const hermesCmd = `hermes run --tools ${origin}/api/agent/v1/tools?format=hermes --header "Authorization: Bearer ${token || "<YOUR_AGENT_TOKEN>"}"`;
+  const hermesCmd = `hermes mcp add inkest --url ${origin}/api/mcp --header "Authorization: Bearer ${token || "<YOUR_AGENT_TOKEN>"}"`;
   const openclawCmd = `openclaw connect --endpoint ${origin}/api/agent/v1/execute --token "${token || "<YOUR_AGENT_TOKEN>"}"`;
 
   const [copiedClaude, setCopiedClaude] = React.useState(false);
@@ -2161,7 +2161,7 @@ export function AgentHarnessSection({
             </button>
           </div>
           <p className="text-[11px] text-muted-foreground">
-            Auto-discovers tools via <code>/api/agent/v1/tools?format=hermes</code>.
+            Auto-connects via Inkest&apos;s native Model Context Protocol (MCP) endpoint at <code>/api/mcp</code>.
           </p>
           <pre className="mt-1 rounded-lg border bg-background/80 p-2.5 font-mono text-[10px] text-muted-foreground overflow-x-auto whitespace-pre-wrap">
             {hermesCmd}

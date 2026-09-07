@@ -214,6 +214,8 @@ export const DEFAULTS: UserSettings = {
 function mergeWithDefaults(raw: UserSettings | null): UserSettings {
   if (!raw) return DEFAULTS;
   return {
+    profileCompleted: raw.profileCompleted,
+    bio: raw.bio,
     editor: { ...DEFAULTS.editor, ...raw.editor },
     ai: { ...DEFAULTS.ai, ...raw.ai },
     theme: { ...DEFAULTS.theme, ...raw.theme },
@@ -228,6 +230,7 @@ function mergeWithDefaults(raw: UserSettings | null): UserSettings {
     superFocus: { ...DEFAULTS.superFocus, ...raw.superFocus },
     tts: { ...DEFAULTS.tts, ...raw.tts },
     notifications: { ...DEFAULTS.notifications, ...raw.notifications },
+    agentHarness: { ...DEFAULTS.agentHarness, ...raw.agentHarness },
   };
 }
 
@@ -365,6 +368,8 @@ export async function updateUserSettings(patch: Partial<UserSettings>): Promise<
 
   const current = await getUserSettings();
   const next: UserSettings = {
+    profileCompleted: parsedPatch.profileCompleted ?? current.profileCompleted,
+    bio: parsedPatch.bio ?? current.bio,
     editor: { ...current.editor, ...parsedPatch.editor },
     ai: { ...current.ai, ...parsedPatch.ai },
     theme: { ...current.theme, ...parsedPatch.theme },
@@ -379,6 +384,7 @@ export async function updateUserSettings(patch: Partial<UserSettings>): Promise<
     superFocus: { ...current.superFocus, ...parsedPatch.superFocus },
     tts: { ...current.tts, ...parsedPatch.tts },
     notifications: { ...current.notifications, ...parsedPatch.notifications },
+    agentHarness: { ...current.agentHarness, ...parsedPatch.agentHarness },
   };
 
   const stored: UserSettings = {

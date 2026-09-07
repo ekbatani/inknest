@@ -61,7 +61,8 @@ export async function authenticateAgentRequest(authHeader: string | null): Promi
     return { ok: false, error: "Missing or invalid Authorization header", status: 401 };
   }
 
-  const token = authHeader.slice(7).trim();
+  const rawToken = authHeader.slice(7).trim();
+  const token = rawToken.replace(/^["']|["']$/g, "").trim();
   if (!token.startsWith("ink_agent_")) {
     return { ok: false, error: "Invalid agent token format", status: 401 };
   }
