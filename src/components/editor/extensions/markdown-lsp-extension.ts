@@ -1,7 +1,6 @@
 import { linter, type Diagnostic as CmDiagnostic } from "@codemirror/lint";
-import type { Extension } from "@codemirror/state";
-import type { Text } from "@codemirror/state";
-import { autocompletion, type CompletionContext, type CompletionResult } from "@codemirror/autocomplete";
+import type { Extension, Text } from "@codemirror/state";
+import type { CompletionContext, CompletionResult } from "@codemirror/autocomplete";
 import type { WikiLinkTarget } from "@/lib/markdown/wiki";
 import {
   getMarkdownLanguageService,
@@ -24,10 +23,59 @@ export interface MarkdownLspExtensionOptions {
 }
 
 /**
+ * Completion source for workspace headings triggered by `##keyword`.
+ * Separated from createMarkdownLspExtension so that CodeMirror has only one
+ * single autocompletion({ override: [...] }) extension facet active.
+ */
+export function createWorkspaceHeadingCompletionSource(
+  noteId: string = "active-note",
+  workspaceNotes: WikiLinkTarget[] = []
+) {
+  return async (context: CompletionContext): Promise<CompletionResult | null> => {
+    // Trigger workspace heading completion on ## followed by non-space characters
+    // (e.g. ##intro triggers completion, but typing "## " for an H2 header does not interfere)
+    const match = context.matchBefore(/##[\w\u0600-\u06FF\-][\w\s\u0600-\u06FF\-]*/);
+    if (!match && !context.explicit) {
+      return null;
+    }
+
+    const query = match ? match.text.slice(2).trim().toLowerCase() : "";
+    const service = getMarkdownLanguageService();
+    if (workspaceNotes.length > 0) {
+      service.syncWorkspace(workspaceNotes);
+    }
+
+    const headings: WorkspaceHeadingSymbol[] = await service.getWorkspaceHeadings(query);
+
+    if (headings.length === 0) {
+      return null;
+    }
+
+    return {
+      from: match ? match.from : context.pos,
+      options: headings.map((h) => ({
+        label: `## ${h.headingText}`,
+        detail: h.noteTitle,
+        type: "text",
+        boost: 99,
+        apply: (view, completion, from, to) => {
+          // If note is current note, insert local anchor link; else cross-note link
+          const isCurrent = h.noteId === noteId;
+          const linkText = isCurrent
+            ? `[${h.headingText}](#${h.anchorId})`
+            : `[[${h.noteTitle}#${h.headingText}]]`;
+          view.dispatch({
+            changes: { from, to, insert: linkText },
+          });
+        },
+      })),
+    };
+  };
+}
+
+/**
  * Creates a CodeMirror 6 extension that integrates Microsoft's vscode-markdown-languageservice.
- * Provides:
- * - Real-time diagnostics (e.g. broken header anchors, dead local links)
- * - Workspace heading completions triggered by typing `##`
+ * Provides real-time diagnostics (e.g. broken header anchors, dead local links).
  */
 export function createMarkdownLspExtension(options: MarkdownLspExtensionOptions = {}): Extension {
   const { noteId = "active-note", workspaceNotes = [], onDiagnostics, debounceMs = 500 } = options;
@@ -74,49 +122,5 @@ export function createMarkdownLspExtension(options: MarkdownLspExtensionOptions 
     { delay: debounceMs }
   );
 
-  const headingCompletion = autocompletion({
-    override: [
-      async (context: CompletionContext): Promise<CompletionResult | null> => {
-        // Trigger workspace heading completion on ##
-        const match = context.matchBefore(/##[\w\s\u0600-\u06FF\-]*/);
-        if (!match && !context.explicit) {
-          return null;
-        }
-
-        const query = match ? match.text.slice(2).trim().toLowerCase() : "";
-        const service = getMarkdownLanguageService();
-        if (workspaceNotes.length > 0) {
-          service.syncWorkspace(workspaceNotes);
-        }
-
-        const headings: WorkspaceHeadingSymbol[] = await service.getWorkspaceHeadings(query);
-
-        if (headings.length === 0) {
-          return null;
-        }
-
-        return {
-          from: match ? match.from : context.pos,
-          options: headings.map((h) => ({
-            label: `## ${h.headingText}`,
-            detail: h.noteTitle,
-            type: "text",
-            boost: 99,
-            apply: (view, completion, from, to) => {
-              // If note is current note, insert local anchor link; else cross-note link
-              const isCurrent = h.noteId === noteId;
-              const linkText = isCurrent
-                ? `[${h.headingText}](#${h.anchorId})`
-                : `[[${h.noteTitle}#${h.headingText}]]`;
-              view.dispatch({
-                changes: { from, to, insert: linkText },
-              });
-            },
-          })),
-        };
-      },
-    ],
-  });
-
-  return [lspLinter, headingCompletion];
+  return [lspLinter];
 }

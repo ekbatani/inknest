@@ -52,8 +52,10 @@ import {
   createFindReplacePanel,
   openReplacePanelEffect,
 } from "@/components/editor/find-replace-panel";
-import { createMarkdownLspExtension } from "@/components/editor/extensions/markdown-lsp-extension";
-import { createLivePreviewExtension } from "@/components/editor/extensions/live-preview-extension";
+import {
+  createMarkdownLspExtension,
+  createWorkspaceHeadingCompletionSource,
+} from "@/components/editor/extensions/markdown-lsp-extension";
 
 type Props = {
   value: string;
@@ -474,26 +476,51 @@ function handleEditorLinkClick(
 }
 
 class TaskCheckboxWidget extends WidgetType {
-  constructor(private readonly checked: boolean) {
+  constructor(
+    private readonly checked: boolean,
+    private readonly pos: number,
+    private readonly length: number,
+  ) {
     super();
   }
 
   eq(widget: TaskCheckboxWidget) {
-    return widget.checked === this.checked;
+    return (
+      widget.checked === this.checked &&
+      widget.pos === this.pos &&
+      widget.length === this.length
+    );
   }
 
-  toDOM() {
+  toDOM(view: EditorView) {
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.checked = this.checked;
-    checkbox.disabled = true;
-    checkbox.className = "cm-md-task-checkbox";
+    checkbox.className = "cm-md-task-checkbox cursor-pointer";
     checkbox.ariaLabel = this.checked ? "Checked task" : "Unchecked task";
+
+    checkbox.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const currentDoc = view.state.doc;
+      if (this.pos + this.length > currentDoc.length) return;
+      const segment = currentDoc.sliceString(this.pos, this.pos + this.length);
+      const newSegment = this.checked
+        ? segment.replace(/\[[xX]\]/, "[ ]")
+        : segment.replace(/\[ \]/, "[x]");
+      view.dispatch({
+        changes: {
+          from: this.pos,
+          to: this.pos + this.length,
+          insert: newSegment,
+        },
+      });
+    });
+
     return checkbox;
   }
 
-  ignoreEvent() {
-    return false;
+  ignoreEvent(event: Event) {
+    return event.type === "click" || event.type === "mousedown";
   }
 }
 
@@ -661,7 +688,11 @@ function buildInlineDecorations(linkableNotes: WikiLinkTarget[]) {
             view,
             line.from,
             line.from + task[1].length,
-            new TaskCheckboxWidget(task[2].toLowerCase() === "x"),
+            new TaskCheckboxWidget(
+              task[2].toLowerCase() === "x",
+              line.from,
+              task[1].length,
+            ),
           );
         } else if (heading) {
           hideIfIdle(ranges, view, line.from, line.from + heading[0].length);
@@ -1068,7 +1099,12 @@ export function MarkdownEditor({
       }),
       customSearchKeymap,
       autocompletion({
-        override: [createWikiLinkCompletionSource(targets)],
+        override: [
+          createWikiLinkCompletionSource(targets),
+          ...(enableLsp
+            ? [createWorkspaceHeadingCompletionSource(documentId, targets)]
+            : []),
+        ],
         defaultKeymap: true,
         icons: false,
       }),
@@ -1081,9 +1117,13 @@ export function MarkdownEditor({
         spellcheck: String(spellcheck),
         ...(spellcheckLanguage === "auto" ? {} : { lang: spellcheckLanguage }),
       }),
-      EditorView.decorations.of(buildLineDecorations),
-      EditorView.decorations.of(buildInlineDecorations(targets)),
-      EditorView.decorations.of(buildFencedBlockDecorations),
+      ...(viewMode === "live-preview"
+        ? [
+            EditorView.decorations.of(buildLineDecorations),
+            EditorView.decorations.of(buildInlineDecorations(targets)),
+            EditorView.decorations.of(buildFencedBlockDecorations),
+          ]
+        : []),
       ...(enableLsp
         ? [
             createMarkdownLspExtension({
@@ -1092,7 +1132,6 @@ export function MarkdownEditor({
             }),
           ]
         : []),
-      ...(viewMode === "live-preview" ? [createLivePreviewExtension()] : []),
       EditorView.domEventHandlers({
         click: (event, view) => {
           const target = event.target;
